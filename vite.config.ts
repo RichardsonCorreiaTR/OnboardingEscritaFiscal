@@ -5,7 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/onboardingpescrita/",
+  // Deve coincidir com o nome do repositório no GitHub Pages: user.github.io/NOME_DO_REPO/
+  base: "/OnboardingEscritaFiscal/",
   server: {
     host: "::",
     port: 8080,

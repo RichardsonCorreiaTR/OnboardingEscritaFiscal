@@ -24,7 +24,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename="/onboardingpescrita">
+        <BrowserRouter basename="/OnboardingEscritaFiscal">
           <Routes>
             <Route path="/" element={<Onboarding />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
