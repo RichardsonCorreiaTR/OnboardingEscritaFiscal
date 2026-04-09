@@ -126,13 +126,24 @@ const StepBoasVindas = () => {
   const historiaEscrita = (
     <>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        A equipe de Gestão de Produto Escrita nasceu com a missão de transformar a experiência de gestão de escrita
-        fiscal. Desde o início, nosso foco é criar processos eficientes, intuitivos e que realmente fazem a diferença no
-        dia a dia.
+        A equipe de Gestão de Produto de Escrita Fiscal nasceu com o propósito de transformar a forma como a gestão
+        fiscal é vivenciada no dia a dia das empresas. Desde o início, assumimos o desafio de lidar com um dos cenários
+        mais complexos do ambiente tributário brasileiro, sempre com foco em clareza, eficiência e conformidade.
+      </p>
+      <p className="text-muted-foreground leading-relaxed mb-4">
+        Nosso trabalho é orientado pela busca constante por processos mais inteligentes, soluções intuitivas e
+        experiências que realmente agreguem valor ao usuário. Acreditamos que a escrita fiscal vai além do cumprimento de
+        obrigações: ela é peça-chave para a segurança das informações, a confiabilidade dos dados e o suporte à tomada
+        de decisão.
+      </p>
+      <p className="text-muted-foreground leading-relaxed mb-4">
+        Ao longo da nossa trajetória, evoluímos nossos produtos com base nas mudanças legislativas, na escuta ativa dos
+        clientes e na colaboração entre times. Cada entrega é pensada para reduzir complexidades, otimizar rotinas e
+        trazer mais tranquilidade para quem vive o fiscal todos os dias.
       </p>
       <p className="text-muted-foreground leading-relaxed">
-        Aqui você encontra tudo o que precisa para começar sua jornada conosco: ferramentas, acessos, documentação e muito
-        mais.
+        Aqui você encontra tudo o que precisa para iniciar sua jornada conosco: ferramentas, acessos, documentações e
+        orientações, reunidos para apoiar seu trabalho e potencializar sua experiência com a Escrita Fiscal.
       </p>
     </>
   );
