@@ -126,9 +126,11 @@ const StepBoasVindas = () => {
   const historiaEscrita = (
     <>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        A equipe de Gestão de Produto de Escrita Fiscal nasceu com o propósito de transformar a forma como a gestão
-        fiscal é vivenciada no dia a dia das empresas. Desde o início, assumimos o desafio de lidar com um dos cenários
-        mais complexos do ambiente tributário brasileiro, sempre com foco em clareza, eficiência e conformidade.
+        A equipe de Gestão de Produto de{" "}
+        <strong className="font-semibold text-foreground">Escrita Fiscal</strong> nasceu com o propósito de transformar
+        a forma como a gestão fiscal é vivenciada no dia a dia das empresas. Desde o início, assumimos o desafio de lidar
+        com um dos cenários mais complexos do ambiente tributário brasileiro, sempre com foco em{" "}
+        <strong className="font-semibold text-foreground">clareza, eficiência e conformidade.</strong>
       </p>
       <p className="text-muted-foreground leading-relaxed mb-4">
         Nosso trabalho é orientado pela busca constante por processos mais inteligentes, soluções intuitivas e
@@ -142,8 +144,11 @@ const StepBoasVindas = () => {
         trazer mais tranquilidade para quem vive o fiscal todos os dias.
       </p>
       <p className="text-muted-foreground leading-relaxed">
-        Aqui você encontra tudo o que precisa para iniciar sua jornada conosco: ferramentas, acessos, documentações e
-        orientações, reunidos para apoiar seu trabalho e potencializar sua experiência com a Escrita Fiscal.
+        Aqui você encontra tudo o que precisa para iniciar sua jornada conosco:{" "}
+        <strong className="font-semibold text-foreground">
+          ferramentas, acessos, documentações e orientações
+        </strong>
+        , reunidos para apoiar seu trabalho e potencializar sua experiência com a Escrita Fiscal.
       </p>
     </>
   );
