@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SistemaProvider } from "@/context/SistemaContext";
+import LandingSistema from "./pages/LandingSistema.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import UnderConstruction from "./pages/UnderConstruction.tsx";
@@ -21,17 +23,19 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter basename="/OnboardingEscritaFiscal">
-          <Routes>
-            <Route path="/" element={<Onboarding />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <SistemaProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter basename="/OnboardingEscritaFiscal">
+            <Routes>
+              <Route path="/" element={<LandingSistema />} />
+              <Route path="/portal" element={<Onboarding />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SistemaProvider>
     </QueryClientProvider>
   );
 };

@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useSistema } from "@/context/SistemaContext";
 import {
   Globe, Monitor, Download, Settings, FileArchive, Upload,
   Clock, ClipboardList, FolderSearch, Database, Brain, Puzzle,
@@ -6,7 +8,8 @@ import {
   Handshake, Server, Package, Code, CheckCircle, BookOpen,
   Sparkles, CheckSquare, FileText, Library, CalendarDays,
   Share2, Award, RefreshCw, FolderOpen, Briefcase, Receipt,
-  ScrollText, GraduationCap, Scale, Phone, Mail, Megaphone, FileCheck, Plus, Minus, ListChecks, Video
+  ScrollText, GraduationCap, Scale, Phone, Mail, Megaphone, FileCheck, Plus, Minus, ListChecks, Video,
+  LayoutGrid, Presentation,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -21,65 +24,98 @@ const steps = [
   { icon: Server, label: "Workspace" },
   { icon: Package, label: "Instalações" },
   { icon: Library, label: "Manuais" },
+  { icon: Presentation, label: "Treinamentos" },
   { icon: Code, label: "Tech" },
   { icon: Megaphone, label: "Avisos" },
 ];
 
 /* ─── Step Content Components ─── */
 
-const StepBoasVindas = () => (
-  <div className="animate-fade-in">
-    <div className="bg-card rounded-2xl border border-border p-8 md:p-10 mb-6">
-      <div className="flex flex-col md:flex-row gap-6 items-start">
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold text-foreground mb-3">
-            Nossa <span className="text-accent">História</span>
-          </h3>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            A equipe de Gestão de Produto Escrita nasceu com a missão de transformar a experiência
-            de gestão de escrita Fical. Desde o início, nosso foco é criar processos
-            eficientes, intuitivos e que realmente fazem a diferença no dia a dia.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            Aqui você encontra tudo o que precisa para começar sua jornada conosco:
-            ferramentas, acessos, documentação e muito mais.
-          </p>
-        </div>
-        <div className="hidden md:flex items-center justify-center w-24 h-24 rounded-2xl bg-secondary flex-shrink-0">
-          <Sparkles className="text-accent" size={40} strokeWidth={1.5} />
-        </div>
-      </div>
-      <div className="mt-6 bg-success rounded-xl px-5 py-4 flex items-start gap-3">
-        <Leaf className="text-success-foreground mt-0.5 flex-shrink-0" size={20} />
-        <p className="text-success-foreground text-sm font-medium">
-          Siga cada etapa do stepper acima para completar seu onboarding!
-        </p>
-      </div>
-    </div>
+const StepBoasVindas = () => {
+  const { sistemaId } = useSistema();
 
-    <div className="bg-card rounded-2xl border border-border p-8">
-      <h3 className="text-xl font-bold text-foreground mb-4">
-        Guia de <span className="text-accent">Onboarding</span>
-      </h3>
-      <ol className="space-y-3 text-sm text-muted-foreground">
-        {[
-          "Conheça a história e a cultura do time",
-          "Configure seus acessos aos sistemas core",
-          "Instale as ferramentas necessárias no seu ambiente",
-          "Familiarize-se com a documentação técnica",
-          "Instale as extensões e conclua o checklist",
-        ].map((item, i) => (
-          <li key={i} className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-              {i + 1}
-            </span>
-            <span className="leading-relaxed">{item}</span>
-          </li>
-        ))}
-      </ol>
+  const historiaEscrita = (
+    <>
+      <p className="text-muted-foreground leading-relaxed mb-4">
+        A equipe de Gestão de Produto Escrita nasceu com a missão de transformar a experiência de gestão de escrita
+        fiscal. Desde o início, nosso foco é criar processos eficientes, intuitivos e que realmente fazem a diferença no
+        dia a dia.
+      </p>
+      <p className="text-muted-foreground leading-relaxed">
+        Aqui você encontra tudo o que precisa para começar sua jornada conosco: ferramentas, acessos, documentação e muito
+        mais.
+      </p>
+    </>
+  );
+
+  const historiaContabil = (
+    <>
+      <p className="text-muted-foreground leading-relaxed mb-4">
+        A equipe de Gestão de Produto Contábil nasceu com o propósito de simplificar e fortalecer a jornada contábil das
+        empresas, garantindo segurança, conformidade e clareza em cada etapa. Desde o início, nosso compromisso é
+        desenvolver soluções que traduzem a complexidade da legislação em processos organizados, eficientes e confiáveis.
+      </p>
+      <p className="text-muted-foreground leading-relaxed mb-4">
+        Atuamos de forma integrada nos módulos de Contabilidade, Lalur, Patrimônio, entre outros, sempre com o olhar
+        atento às necessidades reais do contador e da gestão empresarial. Nossa missão é apoiar tomadas de decisão mais
+        estratégicas, assegurando qualidade das informações, agilidade nos fechamentos e tranquilidade no cumprimento das
+        obrigações legais.
+      </p>
+      <p className="text-muted-foreground leading-relaxed">
+        Aqui você encontra tudo o que precisa para iniciar sua jornada conosco: acessos, ferramentas, documentações e
+        orientações pensadas para tornar o dia a dia contábil mais simples, produtivo e seguro.
+      </p>
+    </>
+  );
+
+  return (
+    <div className="animate-fade-in">
+      <div className="bg-card rounded-2xl border border-border p-8 md:p-10 mb-6">
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold text-foreground mb-3">
+              Nossa <span className="text-accent">História</span>
+            </h3>
+            {sistemaId === "contabil" ? historiaContabil : historiaEscrita}
+          </div>
+          <div className="hidden md:flex items-center justify-center w-24 h-24 rounded-2xl bg-secondary flex-shrink-0">
+            <Sparkles className="text-accent" size={40} strokeWidth={1.5} />
+          </div>
+        </div>
+        <div className="mt-6 bg-success rounded-xl px-5 py-4 flex items-start gap-3">
+          <Leaf className="text-success-foreground mt-0.5 flex-shrink-0" size={20} />
+          <p className="text-success-foreground text-sm font-medium">
+            Siga cada etapa do stepper acima para completar seu onboarding!
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-8">
+        <h3 className="text-xl font-bold text-foreground mb-4">
+          Guia de <span className="text-accent">Onboarding</span>
+        </h3>
+        <ol className="space-y-3 text-sm text-muted-foreground">
+          {[
+            "Conheça a história e a cultura do time",
+            "Configure seus acessos aos sistemas core",
+            "Instale as ferramentas necessárias no seu ambiente",
+            "Familiarize-se com a base de conhecimento e os manuais oficiais",
+            "Acesse treinamentos e materiais complementares",
+            "Avance para a etapa técnica: SQL, extensões, IAs e checklist de conclusão",
+            "Acompanhe avisos e comunicados da equipe",
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                {i + 1}
+              </span>
+              <span className="leading-relaxed">{item}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ─── Ecossistema de Trabalho (antigo Sistemas Core) ─── */
 
@@ -340,16 +376,18 @@ const ContactAreaCollapsible = ({ area }: { area: string }) => {
 const SHAREPOINT_CONFIGURAR_AMBIENTE_DW =
   "https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/GP%20-%20NE/!FOLHA/Dom%C3%ADnio%20Conta%20Digital%20e%20Benef%C3%ADcios/Banco%20de%20Dados%20Dom%C3%ADnio%20Beneficios/Alterar%20Chaves%20Registro?csf=1&web=1&e=Rwe5jd";
 
-const SGD_APP_HREF =
-  "https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Aplicativos/SGD?csf=1&web=1";
+const SGD_APP_HREF = "https://sgd.dominiosistemas.com.br/login.html";
 const SGD_MANUAL_HREF =
-  "https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Manuais/SGD?csf=1&web=1";
+  "https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Manuais/SGD?csf=1&web=1&e=as6EPN";
 
 /** Portal de solicitação de serviço (hardware/periféricos) — substitua pelo URL oficial da empresa. */
-const SOLICITACAO_SERVICO_HREF = "#";
+const SOLICITACAO_SERVICO_HREF = "https://trenterprise.service-now.com/esc?id=my_requests";
 
-/** MyExpenses / reembolsos — substitua pelo URL oficial (ex.: Workday Expenses). */
-const MYEXPENSES_HREF = "#";
+const MYEXPENSES_HREF =
+  "https://mingle-portal.inforcloudsuite.com/THOMSONREUTERS_PRD/6a0f40b9-a414-4172-b22c-6ccf437c2126?favoriteContext=xm_default&LogicalId=lid%3A%2F%2Finfor.xm.infor_prd";
+
+/** Atrium — Popular Tools (SharePoint). */
+const ATRIUM_HREF = "https://trten.sharepoint.com/SitePages/Popular-Tools.aspx";
 
 const DOMINIO_VERSOES_LIST_URL = "https://download.dominiosistemas.com.br/atualizacao/contabil/";
 
@@ -553,7 +591,7 @@ const StepEcossistema = () => (
             showManual={false}
           />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <EcossistemaCard
             icon={Award}
             label="DailyPlan"
@@ -562,7 +600,20 @@ const StepEcossistema = () => (
             showManual={false}
           />
           <EcossistemaCard icon={Share2} label="SharePoint" desc="Repositório central de documentos e arquivos." href="https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal?csf=1&web=1&e=3B2Eha" showManual={false} />
-          <EcossistemaCard icon={GraduationCap} label="Certificados" desc="Emissão e consulta de certificados internos." href="https://trten-my.sharepoint.com/:f:/r/personal/richardson_correia_thomsonreuters_com/Documents/Escrita%20Fiscal/Certificados?csf=1&web=1&e=mkAYSf" showManual={false} />
+          <EcossistemaCard
+            icon={LayoutGrid}
+            label="Atrium"
+            desc="Acessa o menu com todos aplicativos da Thomson Reuters - All TR Tools"
+            href={ATRIUM_HREF}
+            showManual={false}
+          />
+          <EcossistemaCard
+            icon={GraduationCap}
+            label="Certificados"
+            desc="Emissão e consulta de certificados internos."
+            href="https://trten-my.sharepoint.com/:f:/r/personal/richardson_correia_thomsonreuters_com/Documents/Escrita%20Fiscal/Certificados?csf=1&web=1&e=mkAYSf"
+            showManual={false}
+          />
         </div>
       </div>
     </div>
@@ -973,6 +1024,31 @@ const StepBaseConhecimento = () => (
   </div>
 );
 
+const StepTreinamentos = () => (
+  <div className="animate-fade-in">
+    <div className="bg-card rounded-2xl border border-border p-8 mb-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center">
+          <Presentation size={22} strokeWidth={1.5} className="text-foreground" />
+        </div>
+        <h3 className="text-xl font-bold text-foreground">
+          <span className="text-accent">Treinamentos</span>
+        </h3>
+      </div>
+      <p className="text-sm text-muted-foreground leading-relaxed mt-3">
+        Etapa para links e materiais de treinamento após os manuais. Inclua aqui referências rápidas, playlists ou
+        documentação que a equipe queira destacar antes da etapa técnica.
+      </p>
+    </div>
+    <div className="bg-success rounded-xl px-5 py-4 flex items-start gap-3">
+      <Leaf className="text-success-foreground mt-0.5 flex-shrink-0" size={20} />
+      <p className="text-success-foreground text-sm font-medium">
+        Conteúdo desta seção pode ser expandido conforme a necessidade do time.
+      </p>
+    </div>
+  </div>
+);
+
 const StepTech = () => (
   <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-6">
     {/* Desenvolvimento */}
@@ -1077,13 +1153,18 @@ const StepTech = () => (
   </div>
 );
 
-const stepComponents = [StepBoasVindas, StepEcossistema, StepInstalacoes, StepBaseConhecimento, StepTech, QuadroAvisos];
+const stepComponents = [StepBoasVindas, StepEcossistema, StepInstalacoes, StepBaseConhecimento, StepTreinamentos, StepTech, QuadroAvisos];
 
 /* ─── Main Page ─── */
 
 const Onboarding = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const { sistemaLabel } = useSistema();
   const ActiveContent = stepComponents[activeStep];
+
+  useEffect(() => {
+    document.title = `Onboarding Gestão ${sistemaLabel} | Gestão de Produto`;
+  }, [sistemaLabel]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -1095,11 +1176,11 @@ const Onboarding = () => {
           <div className="flex items-center justify-center gap-2 mb-6">
             <BarChart3 className="text-accent" size={32} />
             <span className="text-primary-foreground/70 font-semibold text-sm tracking-widest uppercase">
-              Gestão de Produto Escrita
+              Gestão de Produto {sistemaLabel}
             </span>
           </div>
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            Onboarding <span className="text-accent">Gestão Escrita</span>
+            Onboarding <span className="text-accent">Gestão {sistemaLabel}</span>
           </h1>
           <p className="mt-4 text-primary-foreground/60 text-lg md:text-xl max-w-2xl mx-auto font-light">
             Construindo hoje o <span className="text-[hsl(100_20%_72%)] font-semibold">produto do amanhã.</span>
@@ -1110,6 +1191,14 @@ const Onboarding = () => {
           >
             Saiba mais
           </a>
+          <div className="mt-4">
+            <Link
+              to="/"
+              className="text-xs text-primary-foreground/55 hover:text-primary-foreground/90 underline underline-offset-2"
+            >
+              ← Escolher outro sistema
+            </Link>
+          </div>
         </div>
       </section>
 
