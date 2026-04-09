@@ -101,7 +101,8 @@ const knowledge: KnowledgeItem[] = [
   { keywords: ["treinamentos complementares", "materiais de treinamento", "treinamento portal", "capacitação extra"], title: "Treinamentos", description: "Etapa com materiais e links de treinamento após os manuais.", step: 4, stepLabel: "Treinamentos" },
 
   // Tech
-  { keywords: ["sql", "query", "queries", "comandos", "banco"], title: "Comandos SQL", description: "Referência rápida de queries e scripts SQL.", step: 5, stepLabel: "Tech" },
+  { keywords: ["sql", "query", "queries", "comandos", "banco"], title: "Comandos SQL", description: "Pasta Comandos SQL no SharePoint Escrita Fiscal.", href: "https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Comandos%20SQL?csf=1&web=1&e=ahY6UO", step: 5, stepLabel: "Tech" },
+  { keywords: ["performance", "análise de performance", "analise performance", "relatórios performance"], title: "Análises de Performance", description: "Referências, manuais e pasta Análise Performance no SharePoint.", href: "https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Analise%20Performance?csf=1&web=1&e=jwlviB", step: 5, stepLabel: "Tech" },
   { keywords: ["extensão", "extensões", "navegador", "json formatter", "react devtools", "colorzilla"], title: "Extensões de Navegador", description: "JSON Formatter, React DevTools, ColorZilla.", step: 5, stepLabel: "Tech" },
   { keywords: ["checklist", "conclusão", "finalizar"], title: "Checklist de Conclusão", description: "Complete todas as etapas para finalizar o onboarding.", step: 5, stepLabel: "Tech" },
 

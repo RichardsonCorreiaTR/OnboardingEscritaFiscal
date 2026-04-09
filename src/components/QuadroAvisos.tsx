@@ -1,11 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MessageSquarePlus, Tag, Clock, ExternalLink, Megaphone, Filter } from "lucide-react";
+import { useSistema, type SistemaId } from "@/context/SistemaContext";
 
 const REPO = "RichardsonCorreiaTR/OnboardingEscritaFiscal";
+
+/** Labels no GitHub para separar avisos por linha (crie no repositório: Settings → Labels). */
+const LABEL_ESCRITA = "Escrita";
+const LABEL_CONTABIL = "Contábil";
+
 const CATEGORIES = [
   "Informativos", "Reforma Tributária", "PGDAS",
   "Legislação", "Dúvidas", "Dicas", "Processos", "Geral",
 ];
+
+/** Categorias só da linha Escrita — ocultas no Contábil (filtros e listagem). */
+function categoriaSoEscrita(cat: string) {
+  return cat === "Reforma Tributária" || cat === "PGDAS";
+}
+
+function categoriasFiltroVisiveis(sistemaId: SistemaId): string[] {
+  if (sistemaId !== "contabil") return [...CATEGORIES];
+  return CATEGORIES.filter((c) => !categoriaSoEscrita(c));
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   Informativos: "bg-sky-100 text-sky-800 border-sky-200",
@@ -30,11 +46,33 @@ interface Issue {
   pull_request?: unknown;
 }
 
-/** Abre o formulário de novo issue; com filtro ≠ Todos, pré-preenche a label no GitHub (?labels=…). */
-function newIssueUrlForFilter(filter: string): string {
+function issueLabels(issue: Issue) {
+  return issue.labels.map((l) => l.name);
+}
+
+/** Contábil: só issues com label Contábil (ou Contabil). Escrita: label Escrita ou issues sem label Contábil (avisos antigos continuam na linha Escrita). */
+export function issueMatchesSistema(issue: Issue, sistemaId: SistemaId): boolean {
+  const L = issueLabels(issue);
+  const hasContabil = L.some((n) => n === LABEL_CONTABIL || n === "Contabil");
+  const hasEscrita = L.some((n) => n === LABEL_ESCRITA);
+  if (sistemaId === "contabil") return hasContabil;
+  return hasEscrita || !hasContabil;
+}
+
+/**
+ * URL de novo issue no GitHub com labels da linha (Escrita / Contábil) e, opcionalmente, da categoria.
+ * Usa um parâmetro `labels` por label — formato que o GitHub aplica corretamente (evita vírgula codificada como %2C).
+ */
+function newIssueUrlForSistema(sistemaId: SistemaId, categoryFilter: string): string {
   const base = `https://github.com/${REPO}/issues/new`;
-  if (filter === "Todos" || !CATEGORIES.includes(filter)) return base;
-  return `${base}?${new URLSearchParams({ labels: filter }).toString()}`;
+  const linha = sistemaId === "contabil" ? LABEL_CONTABIL : LABEL_ESCRITA;
+  const validas = categoriasFiltroVisiveis(sistemaId);
+  const params = new URLSearchParams();
+  params.append("labels", linha);
+  if (categoryFilter !== "Todos" && validas.includes(categoryFilter)) {
+    params.append("labels", categoryFilter);
+  }
+  return `${base}?${params.toString()}`;
 }
 
 const ISSUES_API = `https://api.github.com/repos/${REPO}/issues?state=all&per_page=100&sort=updated&direction=desc`;
@@ -87,11 +125,20 @@ function githubApiHeaders(): HeadersInit {
 }
 
 const QuadroAvisos = () => {
+  const { sistemaId, sistemaLabel } = useSistema();
   const [issues, setIssues] = useState<Issue[]>(() => readIssuesCache() ?? []);
   const [loading, setLoading] = useState(() => readIssuesCache() === null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [rateLimitWarning, setRateLimitWarning] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("Todos");
+
+  const categoriasUi = useMemo(() => categoriasFiltroVisiveis(sistemaId), [sistemaId]);
+
+  useEffect(() => {
+    if (sistemaId === "contabil" && (filter === "Reforma Tributária" || filter === "PGDAS")) {
+      setFilter("Todos");
+    }
+  }, [sistemaId, filter]);
 
   useEffect(() => {
     setFetchError(null);
@@ -165,9 +212,19 @@ const QuadroAvisos = () => {
     return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  const filtered = filter === "Todos" ? issues : issues.filter((i) => getCategory(i) === filter);
+  const issuesLinha = useMemo(() => {
+    const base = issues.filter((i) => issueMatchesSistema(i, sistemaId));
+    if (sistemaId !== "contabil") return base;
+    return base.filter((i) => {
+      const cat = i.labels.find((l) => CATEGORIES.includes(l.name))?.name || "Geral";
+      return !categoriaSoEscrita(cat);
+    });
+  }, [issues, sistemaId]);
 
-  const newIssueUrl = newIssueUrlForFilter(filter);
+  const filtered =
+    filter === "Todos" ? issuesLinha : issuesLinha.filter((i) => getCategory(i) === filter);
+
+  const newIssueUrl = newIssueUrlForSistema(sistemaId, filter);
 
   return (
     <div className="space-y-6">
@@ -182,12 +239,22 @@ const QuadroAvisos = () => {
               <h3 className="text-xl font-bold text-foreground">
                 Quadro de <span className="text-accent">Avisos</span>
               </h3>
-              <p className="text-sm text-muted-foreground">Compartilhe conhecimento com a equipe</p>
+              <p className="text-sm text-muted-foreground">
+                Gestão <span className="font-semibold text-foreground">{sistemaLabel}</span> — compartilhe conhecimento com a equipe
+              </p>
               {filter !== "Todos" ? (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Nova contribuição será criada com a label <span className="font-semibold text-foreground">{filter}</span> no GitHub.
+                  Nova contribuição no GitHub com as labels{" "}
+                  <span className="font-semibold text-foreground">{sistemaLabel}</span> e{" "}
+                  <span className="font-semibold text-foreground">{filter}</span>.
                 </p>
-              ) : null}
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Nova contribuição com a label de linha{" "}
+                  <span className="font-semibold text-foreground">{sistemaLabel}</span> (conforme o sistema escolhido no
+                  portal).
+                </p>
+              )}
             </div>
           </div>
           <a
@@ -201,6 +268,23 @@ const QuadroAvisos = () => {
         </div>
       </div>
 
+      <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground leading-relaxed">
+        {sistemaId === "contabil" ? (
+          <p>
+            Nesta linha só são listados issues do GitHub que tenham a label{" "}
+            <span className="font-semibold text-foreground">Contábil</span>. Crie a label no repositório (Settings →
+            Labels) e aplique-a nos avisos da gestão contábil. O quadro padrão do repositório era voltado à linha
+            Escrita.
+          </p>
+        ) : (
+          <p>
+            São mostrados os issues com a label <span className="font-semibold text-foreground">Escrita</span> ou sem a
+            label <span className="font-semibold text-foreground">Contábil</span>, para manter os avisos antigos e
+            separar o que for só da linha Contábil.
+          </p>
+        )}
+      </div>
+
       {rateLimitWarning ? (
         <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground">
           <p className="leading-relaxed">{rateLimitWarning}</p>
@@ -209,7 +293,7 @@ const QuadroAvisos = () => {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
-        {["Todos", ...CATEGORIES].map((cat) => (
+        {["Todos", ...categoriasUi].map((cat) => (
           <button
             key={cat}
             onClick={() => setFilter(cat)}
@@ -247,11 +331,18 @@ const QuadroAvisos = () => {
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <Megaphone size={40} className="mx-auto text-muted-foreground/30 mb-4" />
           <h4 className="text-lg font-bold text-foreground mb-2">
-            {issues.length === 0 ? "Nenhuma contribuição ainda" : "Nenhum aviso nesta categoria"}
+            {issuesLinha.length === 0 ? "Nenhuma contribuição ainda" : "Nenhum aviso nesta categoria"}
           </h4>
           <p className="text-sm text-muted-foreground mb-6">
-            {issues.length === 0 ? (
-              "Seja o primeiro a compartilhar algo com a equipe!"
+            {issuesLinha.length === 0 ? (
+              sistemaId === "contabil" ? (
+                <>
+                  Não há issues com a label Contábil. Crie-os no GitHub ou marque issues existentes com essa label para
+                  aparecerem aqui.
+                </>
+              ) : (
+                "Seja o primeiro a compartilhar algo com a equipe!"
+              )
             ) : filter !== "Todos" ? (
               <>
                 Só entram aqui os issues que têm no GitHub a label{" "}

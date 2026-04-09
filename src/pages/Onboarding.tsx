@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "@/components/ui/sonner";
 import { useSistema } from "@/context/SistemaContext";
 import {
   Globe, Monitor, Download, Settings, FileArchive, Upload,
@@ -9,7 +10,7 @@ import {
   Sparkles, CheckSquare, FileText, Library, CalendarDays,
   Share2, Award, RefreshCw, FolderOpen, Briefcase, Receipt,
   ScrollText, GraduationCap, Scale, Phone, Mail, Megaphone, FileCheck, Plus, Minus, ListChecks, Video,
-  LayoutGrid, Presentation,
+  LayoutGrid, Presentation, Activity,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -18,6 +19,94 @@ import QuadroAvisos from "@/components/QuadroAvisos";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
+
+const MSG_OPCAO_INDISPONIVEL = "Esta opção ainda não está disponível.";
+
+function linkDisponivel(url?: string) {
+  return Boolean(url && url !== "#" && url.trim() !== "");
+}
+
+function toastOpcaoIndisponivel(e?: MouseEvent<HTMLElement>) {
+  e?.preventDefault();
+  toast.info(MSG_OPCAO_INDISPONIVEL);
+}
+
+/** Árvore de IAs na etapa Tech — grupos e links externos. */
+const IA_ARVORE: { titulo: string; itens: { label: string; href?: string }[] }[] = [
+  {
+    titulo: "Contabilidade",
+    itens: [
+      {
+        label: "Análise de Embasamento Legal (Escrita, Contabilidade, Lalur e Patrimônio)",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/7e04fbb6-cdef-450f-89b5-d83c392583ba?sidebar=instructions_auto",
+      },
+      {
+        label: "DoR - Análise Crítica - Produto/Tech",
+        href: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/0a642258-ad99-4f86-bf23-d80cbb5a2390",
+      },
+      { label: "Outra IA da Contabilidade" },
+    ],
+  },
+  {
+    titulo: "Escrita",
+    itens: [
+      {
+        label: "DoR - Análise Crítica - Produto/Tech",
+        href: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/0a642258-ad99-4f86-bf23-d80cbb5a2390",
+      },
+      {
+        label: "Assistente de validação de tópicos após 2015 - SAI Escrita Fiscal e Onvio",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/0425df20-2f2a-411b-970a-3bb615aebde1?chain_builder=true&sidebar=instructions_auto",
+      },
+      {
+        label: "Assistente de validação de tópicos até 2015 - SAI Escrita Fiscal",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/72c27e03-3344-4ed4-a425-8c2771cec90e?chain_builder=true",
+      },
+      {
+        label: "Assistente de validação de tópicos - SAI Importação",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/4309c261-2609-47b8-93d7-b9e49418950d?chain_builder=true&sidebar=instructions_auto",
+      },
+      {
+        label: "Assistente de validação de PSAI - Manuais",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/0062c0cf-86c4-472c-a363-455fa0f13a19?chain_builder=true",
+      },
+      {
+        label: "Valida NE",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/a2c759c3-5387-46f7-a0d3-14cec5625fcd?chain_builder=true",
+      },
+      {
+        label: "Análise de Embasamento Legal (Escrita, Contabilidade, Lalur e Patrimônio)",
+        href: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/7e04fbb6-cdef-450f-89b5-d83c392583ba?sidebar=instructions_auto",
+      },
+      {
+        label: "Assistente de Análise de SAIs - Escrita Fiscal - EXCEL",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/7a955ffc-1df3-4f42-94f5-999d92720455",
+      },
+      {
+        label: "Análise de Processos Graves",
+        href: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/a2c759c3-5387-46f7-a0d3-14cec5625fcd?chain_builder=true",
+      },
+    ],
+  },
+  {
+    titulo: "Geral",
+    itens: [
+      { label: "Open Arena Experiences", href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-experiences" },
+      {
+        label: "Ask GPT 5.4",
+        href: "https://aiplatform.thomsonreuters.com/ai-platform/ai-experiences/use/5d1111ef-cc12-4075-99fc-770246cfe3a5",
+      },
+      {
+        label: "Metaprompting - Fix your Prompt",
+        href: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-experiences/use/d7ef634c-5443-454b-b900-8a7cd4ace2a6?sidebar=instructions_auto",
+      },
+      {
+        label: "Assistente educacional",
+        href: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/c09954de-9563-49f9-a898-c452ff48a562",
+      },
+    ],
+  },
+];
 
 const steps = [
   { icon: Handshake, label: "Onboarding" },
@@ -146,47 +235,57 @@ const EcossistemaCard = ({
   showManual?: boolean;
   showAcessar?: boolean;
   configAmbienteHref?: string;
-}) => (
-  <div className="group bg-card rounded-2xl border border-border p-6 flex h-full flex-col items-center text-center gap-3 transition-all duration-300 hover:shadow-lg hover:border-accent/30 hover:-translate-y-1">
-    <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center transition-colors group-hover:bg-accent/10">
-      <Icon size={30} strokeWidth={1.5} className="text-foreground transition-colors group-hover:text-accent" />
+}) => {
+  const clsAcessar =
+    "inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/10";
+  const clsManual =
+    "inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary hover:text-accent";
+
+  return (
+    <div className="group bg-card rounded-2xl border border-border p-6 flex h-full flex-col items-center text-center gap-3 transition-all duration-300 hover:shadow-lg hover:border-accent/30 hover:-translate-y-1">
+      <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center transition-colors group-hover:bg-accent/10">
+        <Icon size={30} strokeWidth={1.5} className="text-foreground transition-colors group-hover:text-accent" />
+      </div>
+      <h4 className="text-sm font-bold text-foreground">{label}</h4>
+      <p className="text-xs text-muted-foreground leading-relaxed flex-1">{desc}</p>
+      <div className="flex w-full flex-col gap-2 mt-auto pt-1">
+        {showAcessar ? (
+          linkDisponivel(href) ? (
+            <a href={href} target="_blank" rel="noopener noreferrer" className={clsAcessar}>
+              <ExternalLink size={14} /> Acessar
+            </a>
+          ) : (
+            <button type="button" onClick={toastOpcaoIndisponivel} className={clsAcessar}>
+              <ExternalLink size={14} /> Acessar
+            </button>
+          )
+        ) : null}
+        {showManual ? (
+          linkDisponivel(manualHref) ? (
+            <a href={manualHref} target="_blank" rel="noopener noreferrer" className={clsManual}>
+              <BookOpen size={14} /> Manual de Acesso
+            </a>
+          ) : (
+            <button type="button" onClick={toastOpcaoIndisponivel} className={clsManual}>
+              <BookOpen size={14} /> Manual de Acesso
+            </button>
+          )
+        ) : null}
+        {configAmbienteHref ? (
+          linkDisponivel(configAmbienteHref) ? (
+            <a href={configAmbienteHref} target="_blank" rel="noopener noreferrer" className={clsManual}>
+              <Settings size={14} /> Configurar Ambiente
+            </a>
+          ) : (
+            <button type="button" onClick={toastOpcaoIndisponivel} className={clsManual}>
+              <Settings size={14} /> Configurar Ambiente
+            </button>
+          )
+        ) : null}
+      </div>
     </div>
-    <h4 className="text-sm font-bold text-foreground">{label}</h4>
-    <p className="text-xs text-muted-foreground leading-relaxed flex-1">{desc}</p>
-    <div className="flex w-full flex-col gap-2 mt-auto pt-1">
-      {showAcessar ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/10"
-        >
-          <ExternalLink size={14} /> Acessar
-        </a>
-      ) : null}
-      {showManual ? (
-        <a
-          href={manualHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary hover:text-accent"
-        >
-          <BookOpen size={14} /> Manual de Acesso
-        </a>
-      ) : null}
-      {configAmbienteHref ? (
-        <a
-          href={configAmbienteHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary hover:text-accent"
-        >
-          <Settings size={14} /> Configurar Ambiente
-        </a>
-      ) : null}
-    </div>
-  </div>
-);
+  );
+};
 
 const CONTACT_AREAS = [
   "Escrita",
@@ -993,14 +1092,24 @@ const StepBaseConhecimento = () => (
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed flex-1">{item.desc}</p>
             <div className="mt-auto flex flex-col gap-2">
-              <a
-                href={"href" in item && item.href ? item.href : "#"}
-                target={"href" in item && item.href ? "_blank" : undefined}
-                rel={"href" in item && item.href ? "noopener noreferrer" : undefined}
-                className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
-              >
-                <ActionIcon size={16} /> {item.action}
-              </a>
+              {"href" in item && item.href ? (
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+                >
+                  <ActionIcon size={16} /> {item.action}
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={toastOpcaoIndisponivel}
+                  className="flex w-full items-center gap-2 rounded-lg bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+                >
+                  <ActionIcon size={16} /> {item.action}
+                </button>
+              )}
               {"secondaryAction" in item && item.secondaryAction && "secondaryHref" in item && item.secondaryHref ? (
                 <a
                   href={item.secondaryHref}
@@ -1062,18 +1171,41 @@ const StepTech = () => (
       <p className="text-sm text-muted-foreground leading-relaxed">
         Referência rápida de queries e scripts SQL utilizados na gestão de escrita de pagamento.
       </p>
-      <a href="https://trten-my.sharepoint.com/personal/sabrina_guessi_thomsonreuters_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fsabrina%5Fguessi%5Fthomsonreuters%5Fcom%2FDocuments%2FTREINAMENTO%20FUNCION%C3%81RIOS%20NOVOS%2FCOMANDOSs&viewid=7309f27f%2D1d49%2D48ce%2Da23b%2D899f2b94c3fb&CT=1754672324831&OR=OWA%2DNT%2DMail&CID=359e6537%2De6da%2D6605%2D9c64%2D77496e398372&sharingv2=true&fromShare=true&at=9&FolderCTID=0x0120002BAEA7F2C7580140AA6707D43E76E455&view=0" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent mt-auto">
+      <a href="https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Comandos%20SQL?csf=1&web=1&e=ahY6UO" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent mt-auto">
         <BookOpen size={16} /> Acessar Documentação
         <ExternalLink size={14} className="ml-auto" />
       </a>
       <div className="bg-success rounded-xl px-4 py-3 flex items-start gap-2 mt-2">
         <Leaf className="text-success-foreground mt-0.5 flex-shrink-0" size={16} />
-        <p className="text-success-foreground text-xs font-medium">Sempre teste queries em ambiente de homologação primeiro.</p>
+        <p className="text-success-foreground text-xs font-medium">
+          Nunca execute um comando SQL em um banco de dados no ambiente Oficial do cliente.
+        </p>
       </div>
     </div>
 
-    {/* Extensões */}
     <div className="bg-card rounded-2xl border border-border p-8 flex flex-col gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center">
+          <Activity size={22} strokeWidth={1.5} className="text-foreground" />
+        </div>
+        <h3 className="text-lg font-bold text-foreground">Análises de Performance</h3>
+      </div>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        Referências e manuais, relatórios e configurações para análise de performance.
+      </p>
+      <a
+        href="https://trten.sharepoint.com/:f:/r/sites/TaxProfDominioContabil/Shared%20Documents/Escrita%20Fiscal/Analise%20Performance?csf=1&web=1&e=jwlviB"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent mt-auto"
+      >
+        <BookOpen size={16} /> Acessar Documentação
+        <ExternalLink size={14} className="ml-auto" />
+      </a>
+    </div>
+
+    {/* Extensões */}
+    <div className="md:col-span-2 bg-card rounded-2xl border border-border p-8 flex flex-col gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       <div className="flex items-center gap-3 mb-2">
         <div className="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center">
           <Puzzle size={22} strokeWidth={1.5} className="text-foreground" />
@@ -1085,55 +1217,71 @@ const StepTech = () => (
       </p>
       <div className="flex flex-col gap-2 mt-auto">
         {["JSON Formatter", "React DevTools", "ColorZilla"].map((ext, i) => (
-          <a key={i} href="#" className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent">
+          <button
+            key={i}
+            type="button"
+            onClick={toastOpcaoIndisponivel}
+            className="flex w-full items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-left text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+          >
             <Puzzle size={16} /> {ext}
             <ExternalLink size={14} className="ml-auto" />
-          </a>
+          </button>
         ))}
+      </div>
+      <div className="bg-success rounded-xl px-4 py-3 flex items-start gap-2 mt-2">
+        <Leaf className="text-success-foreground mt-0.5 flex-shrink-0" size={16} />
+        <p className="text-success-foreground text-xs font-medium leading-relaxed">
+          Localize no seu navegador a opção de instalação de Extensão do seu navegador para encontrar
+        </p>
       </div>
     </div>
 
-    {/* IAs */}
-    <div className="md:col-span-2 bg-card rounded-2xl border border-border p-8 flex flex-col gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-      <div className="flex items-center gap-3 mb-2">
+    {/* IAs — estrutura em árvore */}
+    <div className="md:col-span-2 bg-card rounded-2xl border border-border p-8 flex flex-col gap-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <div className="flex items-center gap-3 mb-1">
         <div className="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center">
           <Brain size={22} strokeWidth={1.5} className="text-foreground" />
         </div>
         <h3 className="text-lg font-bold text-foreground">IAs Utilizadas</h3>
       </div>
-      <p className="text-sm text-muted-foreground leading-relaxed">
-        Inteligências artificiais integradas ao produto para apoiar o dia a dia.
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-        {[
-          { name: "Validação de Estrutura das PSAIs de NEs do Legado", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/d4734fc4-66e0-4ec1-a704-b09ef3234634?sidebar=instructions_auto" },
-          { name: "Assistente educacional", url: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/c09954de-9563-49f9-a898-c452ff48a562" },
-          { name: "Criar Rubrica através do assistente de IA", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/52d6965b-c37-49cc-8ce2-ce996fd55ece?sidebar=instructions_auto" },
-          { name: "Agrupamento SAIs", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/3caad024-4894-4a6c-9bde-3a7692d450c4?sidebar=instructions_auto" },
-          { name: "Análise das irregularidades", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/995e98f3-98ba-4ea3-8556-442693eddce?sidebar=instructions_auto" },
-          { name: "Meu Prompt", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/f5fd1d2c-e0bb-4a9c-a494-3c3a42cb6969?sidebar=instructions" },
-          { name: "IGOR - Instrutor de Geração e Otimização de Roteiros", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/34b45254-f1ac-4f0d-a7bc-74aaaee96e88?sidebar=instructions" },
-          { name: "Assistente de Análise de SAIs - Escrita de Pagamento - EXCEL", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/46745cc7-263a-4f00-af8a-f4027e3cf3b5" },
-          { name: "CHAIN AI TRIA - DOMINIO", url: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/3679317a-l205-4c29-a847-08c8c93fb592" },
-          { name: "Rubricas com Fórmulas", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/b653d9c8-da78-4860-9347-e08a8c97c145?sidebar=instructions_auto" },
-          { name: "Tradução - Inglês", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/37ec1afe-fd69-44b6-95ae-bef608ce57d1" },
-          { name: "Valida PSAI - 200k Tokens", url: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-chains/use/d80f55af-7d45-420c-adc1-065743520fd4" },
-          { name: "Definição", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/07a4a529-30ca-4d64-a813-2cfad0848243" },
-          { name: "Ask GPT 5.2", url: "https://dataandanalytics.int.thomsonreuters.com/ai-platform/ai-experiences/use/cd8d90f6-ce37-4e69-9433-92e658a33675" },
-          { name: "Metaprompting - Generate your Prompt", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-experiences/use/53737406-b11d-4b13-afd2-57e1e33c1c49?sidebar=instructions_auto" },
-          { name: "Metaprompting - Fix your Prompt", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-experiences/use/c67e6f34c-5443-454b-b800-8a7cd4ace2a5?sidebar=instructions_auto" },
-          { name: "Criação de exemplo para SAI de definição", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/50d5759e-29f6-41e3-b38a-8182152ff63b?sidebar=instructions_auto" },
-          { name: "Inicio de PSAI avaliando primeiros pontos", url: "https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/b3e1bc25-a947-4e2e-9f56-dc8f7fbabf1f?sidebar=instructions_auto" },
-        ].map((item, i) => (
-          <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/10 hover:text-accent">
-            <Brain size={14} className="flex-shrink-0" /> <span className="truncate">{item.name}</span>
-            <ExternalLink size={12} className="ml-auto flex-shrink-0" />
-          </a>
+      <div className="mt-2 space-y-1 rounded-xl border border-border bg-muted/20 p-3">
+        {IA_ARVORE.map((grupo) => (
+          <Collapsible key={grupo.titulo} defaultOpen className="rounded-lg border border-transparent hover:border-border">
+            <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-lg px-2 py-2.5 text-left text-sm font-bold text-foreground transition-colors hover:bg-secondary/80 data-[state=open]:bg-secondary/60">
+              <span className="font-mono text-accent tabular-nums w-4 shrink-0">+</span>
+              <span>{grupo.titulo}</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ul className="ml-4 border-l-2 border-border/80 pl-4 py-2 space-y-1">
+                {grupo.itens.map((item, idx) => (
+                  <li key={idx} className="text-sm leading-snug">
+                    {linkDisponivel(item.href) ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-2 rounded-md py-1.5 pl-1 text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+                      >
+                        <span className="mt-0.5 shrink-0 text-muted-foreground">−</span>
+                        <span className="min-w-0 flex-1">{item.label}</span>
+                        <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-60" />
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={toastOpcaoIndisponivel}
+                        className="flex w-full items-start gap-2 rounded-md py-1.5 pl-1 text-left text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+                      >
+                        <span className="mt-0.5 shrink-0 text-muted-foreground">−</span>
+                        <span className="min-w-0">{item.label}</span>
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </CollapsibleContent>
+          </Collapsible>
         ))}
-      </div>
-      <div className="bg-success rounded-xl px-4 py-3 flex items-start gap-2 mt-2">
-        <Leaf className="text-success-foreground mt-0.5 flex-shrink-0" size={16} />
-        <p className="text-success-foreground text-xs font-medium">Use as IAs como apoio — sempre valide os resultados.</p>
       </div>
     </div>
 
@@ -1185,12 +1333,13 @@ const Onboarding = () => {
           <p className="mt-4 text-primary-foreground/60 text-lg md:text-xl max-w-2xl mx-auto font-light">
             Construindo hoje o <span className="text-[hsl(100_20%_72%)] font-semibold">produto do amanhã.</span>
           </p>
-          <a
-            href="#"
-            className="inline-block mt-6 bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-sm px-8 py-3 rounded-lg transition-colors"
+          <button
+            type="button"
+            onClick={toastOpcaoIndisponivel}
+            className="inline-block mt-6 bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-sm px-8 py-3 rounded-lg transition-colors cursor-pointer"
           >
             Saiba mais
-          </a>
+          </button>
           <div className="mt-4">
             <Link
               to="/"
